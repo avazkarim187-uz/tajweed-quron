@@ -73,6 +73,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+    // Material Components (for XML theme)
+    implementation("com.google.android.material:material:1.11.0")
+
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.6")
 

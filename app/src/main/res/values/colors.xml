@@ -2,6 +2,7 @@
 <resources>
     <!-- Primary -->
     <color name="primary">#FF1B5E20</color>
+    <color name="primary_dark">#FF0D3B13</color>
     <color name="primary_light">#FF4CAF50</color>
     <color name="secondary">#FFF9A825</color>
     <color name="tertiary">#FF1565C0</color>
