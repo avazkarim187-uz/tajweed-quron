@@ -198,14 +198,13 @@ private fun PracticeRuleCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             LinearProgressIndicator(
-                progress = { (ruleItem.bestScore / 100f).coerceIn(0f, 1f) },
+                progress = (ruleItem.bestScore / 100f).coerceIn(0f, 1f),
                 modifier = Modifier.fillMaxWidth(),
                 color = when {
                     ruleItem.bestScore >= 80f -> MaterialTheme.colorScheme.primary
                     ruleItem.bestScore >= 60f -> MaterialTheme.colorScheme.secondary
                     else -> MaterialTheme.colorScheme.error
-                },
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                }
             )
         }
     }
