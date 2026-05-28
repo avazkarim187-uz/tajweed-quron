@@ -149,7 +149,6 @@ private fun OverallStatsCard(uiState: ProgressUiState) {
                     progress = uiState.overallScore / 100f,
                     modifier = Modifier.size(120.dp),
                     strokeWidth = 10.dp,
-                    trackColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.3f),
                     color = MaterialTheme.colorScheme.primary
                 )
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

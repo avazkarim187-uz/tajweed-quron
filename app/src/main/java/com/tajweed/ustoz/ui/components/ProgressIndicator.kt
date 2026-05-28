@@ -28,10 +28,9 @@ fun TajweedProgressIndicator(
             modifier = Modifier.size(size)
         ) {
             CircularProgressIndicator(
-                progress = { progress.coerceIn(0f, 1f) },
+                progress = progress.coerceIn(0f, 1f),
                 modifier = Modifier.size(size),
                 color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 strokeWidth = 6.dp
             )
             Text(
