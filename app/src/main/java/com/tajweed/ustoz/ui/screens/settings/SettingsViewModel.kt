@@ -2,14 +2,18 @@ package com.tajweed.ustoz.ui.screens.settings
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.tajweed.ustoz.data.remote.FirebaseService
 import com.tajweed.ustoz.data.repository.ProgressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,6 +47,17 @@ class SettingsViewModel @Inject constructor(
 
     private val prefs = application.getSharedPreferences("tajweed_settings", Context.MODE_PRIVATE)
 
+    private val encryptedPrefs: SharedPreferences by lazy {
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        EncryptedSharedPreferences.create(
+            "tajweed_secure_prefs",
+            masterKeyAlias,
+            application,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
+
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
@@ -54,7 +69,7 @@ class SettingsViewModel @Inject constructor(
         val theme = ThemeMode.valueOf(prefs.getString("theme", ThemeMode.SYSTEM.name) ?: ThemeMode.SYSTEM.name)
         val language = AppLanguage.valueOf(prefs.getString("language", AppLanguage.UZBEK.name) ?: AppLanguage.UZBEK.name)
         val notifications = prefs.getBoolean("notifications", true)
-        val apiKey = prefs.getString("api_key", null)
+        val apiKey = encryptedPrefs.getString("api_key", null)
         val currentUser = firebaseService.getCurrentUser()
 
         _uiState.value = SettingsUiState(
@@ -108,20 +123,19 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun saveApiKey(key: String) {
-        prefs.edit().putString("api_key", key).apply()
+        encryptedPrefs.edit().putString("api_key", key).apply()
         _uiState.value = _uiState.value.copy(apiKeyConfigured = key.isNotBlank())
     }
 
     fun getApiKey(): String? {
-        return prefs.getString("api_key", null)
+        return encryptedPrefs.getString("api_key", null)
     }
 
     fun syncProgress() {
         viewModelScope.launch {
             val user = firebaseService.getCurrentUser() ?: return@launch
-            progressRepository.getProgress().collect { progressList ->
-                firebaseService.syncProgress(user.uid, progressList)
-            }
+            val progressList = progressRepository.getProgress().first()
+            firebaseService.syncProgress(user.uid, progressList)
         }
     }
 }

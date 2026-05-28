@@ -153,7 +153,7 @@ private fun DailyStatsCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "${(overallScore * 100).toInt()}%",
+                    text = "${overallScore.toInt()}%",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -266,7 +266,7 @@ private fun RecentResultItem(result: com.tajweed.ustoz.data.model.UserProgress) 
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "${(result.practiceScore * 100).toInt()}%",
+                text = "${result.practiceScore.toInt()}%",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )

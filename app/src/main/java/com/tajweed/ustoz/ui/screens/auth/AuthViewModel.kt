@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.tajweed.ustoz.data.remote.FirebaseService
+import com.tajweed.ustoz.data.repository.ProgressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +25,8 @@ data class AuthUiState(
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val firebaseService: FirebaseService
+    private val firebaseService: FirebaseService,
+    private val progressRepository: ProgressRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -62,6 +64,7 @@ class AuthViewModel @Inject constructor(
                         isAuthenticated = true,
                         user = user
                     )
+                    pullRemoteProgress(user.uid)
                 },
                 onFailure = { exception ->
                     _uiState.value = _uiState.value.copy(
@@ -97,6 +100,7 @@ class AuthViewModel @Inject constructor(
                         isAuthenticated = true,
                         user = user
                     )
+                    pullRemoteProgress(user.uid)
                 },
                 onFailure = { exception ->
                     _uiState.value = _uiState.value.copy(
@@ -120,6 +124,7 @@ class AuthViewModel @Inject constructor(
                     isAuthenticated = user != null,
                     user = user
                 )
+                user?.uid?.let { pullRemoteProgress(it) }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -154,6 +159,19 @@ class AuthViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    private fun pullRemoteProgress(userId: String) {
+        viewModelScope.launch {
+            try {
+                val remoteProgress = firebaseService.getRemoteProgress(userId)
+                remoteProgress.forEach { remote ->
+                    progressRepository.updateProgress(remote)
+                }
+            } catch (e: Exception) {
+                // Silently fail - remote sync is best-effort
+            }
+        }
     }
 
     private fun isValidEmail(email: String): Boolean {

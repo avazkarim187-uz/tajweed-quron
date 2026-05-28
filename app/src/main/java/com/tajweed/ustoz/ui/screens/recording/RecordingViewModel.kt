@@ -57,6 +57,21 @@ class RecordingViewModel @Inject constructor(
     private var currentRuleId: Int? = null
     private var ruleIds: List<Int> = emptyList()
 
+    init {
+        cleanupOldRecordings()
+    }
+
+    /**
+     * Deletes leftover temporary audio files from previous sessions.
+     */
+    private fun cleanupOldRecordings() {
+        val context = getApplication<Application>()
+        val cacheDir = context.cacheDir
+        cacheDir.listFiles()?.filter { it.name.startsWith("recording_") && it.name.endsWith(".m4a") }?.forEach { file ->
+            file.delete()
+        }
+    }
+
     fun loadTarget(ayahId: Int?, ruleId: Int?) {
         currentAyahId = ayahId
         currentRuleId = ruleId
@@ -160,6 +175,9 @@ class RecordingViewModel @Inject constructor(
                     )
 
                     val savedId = recordingRepository.saveResult(recordingResult)
+
+                    // Clean up the temporary audio file after successful processing
+                    file.delete()
 
                     // Update user progress if rule-based
                     currentRuleId?.let { ruleId ->

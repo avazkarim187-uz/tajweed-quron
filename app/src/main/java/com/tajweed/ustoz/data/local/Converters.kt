@@ -1,9 +1,13 @@
 package com.tajweed.ustoz.data.local
 
 import androidx.room.TypeConverter
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.util.Date
 
 class Converters {
+
+    private val gson = Gson()
 
     @TypeConverter
     fun dateToLong(date: Date?): Long? {
@@ -17,11 +21,13 @@ class Converters {
 
     @TypeConverter
     fun listToString(list: List<String>?): String? {
-        return list?.joinToString(",")
+        return list?.let { gson.toJson(it) }
     }
 
     @TypeConverter
     fun stringToList(value: String?): List<String>? {
-        return value?.split(",")?.map { it.trim() }
+        if (value == null) return null
+        val listType = object : TypeToken<List<String>>() {}.type
+        return gson.fromJson(value, listType)
     }
 }

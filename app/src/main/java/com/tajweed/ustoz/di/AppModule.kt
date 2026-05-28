@@ -1,7 +1,10 @@
 package com.tajweed.ustoz.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.tajweed.ustoz.data.local.DatabaseCallback
@@ -31,6 +34,10 @@ import javax.inject.Singleton
 @Qualifier
 annotation class ApplicationScope
 
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class EncryptedPrefs
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
@@ -40,6 +47,22 @@ object AppModule {
     @Singleton
     fun provideApplicationScope(): CoroutineScope {
         return CoroutineScope(SupervisorJob())
+    }
+
+    @EncryptedPrefs
+    @Provides
+    @Singleton
+    fun provideEncryptedSharedPreferences(
+        @ApplicationContext context: Context
+    ): SharedPreferences {
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        return EncryptedSharedPreferences.create(
+            "tajweed_secure_prefs",
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
     }
 
     @Provides
@@ -79,15 +102,18 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(
+        @EncryptedPrefs encryptedPrefs: SharedPreferences
+    ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         val apiKeyInterceptor = Interceptor { chain ->
+            val apiKey = encryptedPrefs.getString("api_key", "") ?: ""
             val original = chain.request()
             val request = original.newBuilder()
-                .header("Authorization", "Bearer ${getApiKey()}")
+                .header("Authorization", "Bearer $apiKey")
                 .build()
             chain.proceed(request)
         }
@@ -124,10 +150,5 @@ object AppModule {
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {
         return FirebaseAuth.getInstance()
-    }
-
-    private fun getApiKey(): String {
-        // API key should be stored securely, e.g., in BuildConfig or encrypted preferences
-        return ""
     }
 }
