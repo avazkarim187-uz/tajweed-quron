@@ -1,17 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTheme } from '../../src/contexts/ThemeContext';
+import { useProgress } from '../../src/contexts/ProgressContext';
 import { tajweedRules } from '../../src/data/tajweedRules';
 import { quranAyahs } from '../../src/data/quranData';
 import { Colors } from '../../src/constants/colors';
 import { ArabicText } from '../../src/components/ArabicText';
 import { RecordingButton } from '../../src/components/RecordingButton';
+import { ScoreCircle } from '../../src/components/ScoreCircle';
 import { QuranAyah } from '../../src/data/models';
+import * as audioRecorder from '../../src/services/audioRecorder';
+import { transcribeAudio } from '../../src/services/whisperApi';
+import { analyzeRecitation, TajweedAnalysisResult } from '../../src/services/tajweedAnalyzer';
+import { getApiKey } from '../../src/services/storage';
 
 export default function PracticeSessionScreen() {
   const { ruleId } = useLocalSearchParams<{ ruleId: string }>();
   const { theme } = useTheme();
+  const { updateProgress } = useProgress();
 
   const ruleIdNum = parseInt(ruleId || '0', 10);
   const rule = tajweedRules.find((r) => r.id === ruleIdNum);
@@ -24,8 +31,11 @@ export default function PracticeSessionScreen() {
   const [currentAyah, setCurrentAyah] = useState<QuranAyah | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [hasRecorded, setHasRecorded] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<TajweedAnalysisResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordingRef = useRef<{ recording: unknown } | null>(null);
 
   useEffect(() => {
     pickRandomAyah();
@@ -51,24 +61,87 @@ export default function PracticeSessionScreen() {
     if (matchingAyahs.length === 0) return;
     const idx = Math.floor(Math.random() * matchingAyahs.length);
     setCurrentAyah(matchingAyahs[idx]);
-    setHasRecorded(false);
     setRecordingTime(0);
+    setAnalysisResult(null);
+    setErrorMessage(null);
   }
 
-  function handleRecordPress() {
+  async function handleRecordPress() {
     if (isRecording) {
-      setIsRecording(false);
-      setHasRecorded(true);
+      await handleStopRecording();
     } else {
+      await handleStartRecording();
+    }
+  }
+
+  async function handleStartRecording() {
+    try {
+      setErrorMessage(null);
+      setAnalysisResult(null);
+
+      const hasPermission = await audioRecorder.requestPermissions();
+      if (!hasPermission) {
+        setErrorMessage("Mikrofon ruxsati berilmagan. Sozlamalardan ruxsat bering.");
+        return;
+      }
+
+      const recording = await audioRecorder.startRecording();
+      recordingRef.current = { recording };
       setIsRecording(true);
       setRecordingTime(0);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Yozib olishni boshlashda xatolik";
+      setErrorMessage(msg);
+    }
+  }
+
+  async function handleStopRecording() {
+    try {
+      setIsRecording(false);
+
+      if (!recordingRef.current) {
+        setErrorMessage("Yozuv topilmadi");
+        return;
+      }
+
+      const recording = recordingRef.current.recording as Awaited<ReturnType<typeof audioRecorder.startRecording>>;
+      const uri = await audioRecorder.stopRecording(recording);
+      recordingRef.current = null;
+
+      if (!currentAyah) return;
+
+      setIsAnalyzing(true);
+
+      const apiKey = await getApiKey();
+      if (!apiKey) {
+        setErrorMessage("API kalit sozlanmagan. Sozlamalar bo'limida API kalitni kiriting.");
+        setIsAnalyzing(false);
+        return;
+      }
+
+      const transcription = await transcribeAudio(uri, apiKey);
+
+      if (!transcription.success) {
+        setErrorMessage(transcription.error || "Ovozni tanib olishda xatolik yuz berdi");
+        setIsAnalyzing(false);
+        return;
+      }
+
+      const result = analyzeRecitation(currentAyah.arabicText, transcription.text || '');
+      setAnalysisResult(result);
+      updateProgress(ruleIdNum, result.score);
+      setIsAnalyzing(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Tahlil qilishda xatolik yuz berdi";
+      setErrorMessage(msg);
+      setIsAnalyzing(false);
     }
   }
 
   function formatTime(seconds: number): string {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
   if (!rule) {
@@ -131,14 +204,59 @@ export default function PracticeSessionScreen() {
           </Text>
         </View>
 
-        {hasRecorded && (
+        {isAnalyzing && (
           <View style={[styles.resultCard, { backgroundColor: theme.colors.surface }]}>
-            <Text style={[styles.resultTitle, { color: theme.colors.onSurface }]}>
-              Natija
+            <ActivityIndicator size="large" color={Colors.primary.main} />
+            <Text style={[styles.analyzingText, { color: theme.colors.onSurfaceVariant }]}>
+              Ovoz tahlil qilinmoqda...
             </Text>
-            <Text style={[styles.resultText, { color: theme.colors.onSurfaceVariant }]}>
-              Ovoz tahlil qilinmoqda... (FEAT-004 da ulanadi)
+          </View>
+        )}
+
+        {errorMessage && !isAnalyzing && (
+          <View style={[styles.resultCard, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.errorMessage, { color: Colors.error.main }]}>
+              {errorMessage}
             </Text>
+          </View>
+        )}
+
+        {analysisResult && !isAnalyzing && (
+          <View style={[styles.resultCard, { backgroundColor: theme.colors.surface }]}>
+            <View style={styles.scoreRow}>
+              <ScoreCircle score={analysisResult.score} size={80} />
+              <View style={styles.feedbackColumn}>
+                <Text style={[styles.feedbackText, { color: theme.colors.onSurface }]}>
+                  {analysisResult.feedback}
+                </Text>
+              </View>
+            </View>
+
+            {analysisResult.errors.length > 0 && (
+              <View style={styles.errorsSection}>
+                <Text style={[styles.errorsTitle, { color: theme.colors.onSurface }]}>
+                  Xatolar:
+                </Text>
+                {analysisResult.errors.slice(0, 5).map((error, index) => (
+                  <View key={index} style={styles.errorRow}>
+                    <Text style={[styles.errorExpected, { color: Colors.primary.main }]}>
+                      {error.expected || '(tushirilgan)'}
+                    </Text>
+                    <Text style={[styles.errorArrow, { color: theme.colors.onSurfaceVariant }]}>
+                      {' → '}
+                    </Text>
+                    <Text style={[styles.errorGot, { color: Colors.error.main }]}>
+                      {error.got || '(yo\'q)'}
+                    </Text>
+                  </View>
+                ))}
+                {analysisResult.errors.length > 5 && (
+                  <Text style={[styles.moreErrors, { color: theme.colors.onSurfaceVariant }]}>
+                    +{analysisResult.errors.length - 5} ta boshqa xato
+                  </Text>
+                )}
+              </View>
+            )}
           </View>
         )}
 
@@ -233,13 +351,58 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 2,
   },
-  resultTitle: {
-    fontSize: 16,
+  analyzingText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  errorMessage: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  feedbackColumn: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  feedbackText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  errorsSection: {
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+    paddingTop: 12,
+  },
+  errorsTitle: {
+    fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
   },
-  resultText: {
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  errorExpected: {
     fontSize: 14,
+    fontWeight: '500',
+  },
+  errorArrow: {
+    fontSize: 14,
+  },
+  errorGot: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  moreErrors: {
+    fontSize: 12,
+    marginTop: 4,
   },
   nextButton: {
     backgroundColor: '#2E7D32',

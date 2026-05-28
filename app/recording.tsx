@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTheme } from '../src/contexts/ThemeContext';
 import { Colors } from '../src/constants/colors';
 import { RecordingButton } from '../src/components/RecordingButton';
+import * as audioRecorder from '../src/services/audioRecorder';
+import { transcribeAudio } from '../src/services/whisperApi';
+import { getApiKey } from '../src/services/storage';
 
 export default function RecordingScreen() {
   const { theme } = useTheme();
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcriptionText, setTranscriptionText] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordingRef = useRef<{ recording: unknown } | null>(null);
 
   useEffect(() => {
     if (isRecording) {
@@ -26,19 +33,77 @@ export default function RecordingScreen() {
     };
   }, [isRecording]);
 
-  function handleRecordPress() {
+  async function handleRecordPress() {
     if (isRecording) {
-      setIsRecording(false);
+      await handleStopRecording();
     } else {
+      await handleStartRecording();
+    }
+  }
+
+  async function handleStartRecording() {
+    try {
+      setErrorMessage(null);
+      setTranscriptionText(null);
+
+      const hasPermission = await audioRecorder.requestPermissions();
+      if (!hasPermission) {
+        setErrorMessage("Mikrofon ruxsati berilmagan. Sozlamalardan ruxsat bering.");
+        return;
+      }
+
+      const recording = await audioRecorder.startRecording();
+      recordingRef.current = { recording };
       setIsRecording(true);
       setRecordingTime(0);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Yozib olishni boshlashda xatolik";
+      setErrorMessage(msg);
+    }
+  }
+
+  async function handleStopRecording() {
+    try {
+      setIsRecording(false);
+
+      if (!recordingRef.current) {
+        setErrorMessage("Yozuv topilmadi");
+        return;
+      }
+
+      const recording = recordingRef.current.recording as Awaited<ReturnType<typeof audioRecorder.startRecording>>;
+      const uri = await audioRecorder.stopRecording(recording);
+      recordingRef.current = null;
+
+      setIsTranscribing(true);
+
+      const apiKey = await getApiKey();
+      if (!apiKey) {
+        setErrorMessage("API kalit sozlanmagan. Sozlamalar bo'limida API kalitni kiriting.");
+        setIsTranscribing(false);
+        return;
+      }
+
+      const result = await transcribeAudio(uri, apiKey);
+
+      if (result.success) {
+        setTranscriptionText(result.text || '');
+      } else {
+        setErrorMessage(result.error || "Ovozni tanib olishda xatolik yuz berdi");
+      }
+
+      setIsTranscribing(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Xatolik yuz berdi";
+      setErrorMessage(msg);
+      setIsTranscribing(false);
     }
   }
 
   function formatTime(seconds: number): string {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
   return (
@@ -60,7 +125,7 @@ export default function RecordingScreen() {
               </Text>
             </View>
           )}
-          {!isRecording && recordingTime > 0 && (
+          {!isRecording && recordingTime > 0 && !isTranscribing && !transcriptionText && !errorMessage && (
             <Text style={[styles.doneText, { color: Colors.primary.main }]}>
               Yozib olindi: {formatTime(recordingTime)}
             </Text>
@@ -77,6 +142,34 @@ export default function RecordingScreen() {
             {isRecording ? "To'xtatish uchun bosing" : "Boshlash uchun bosing"}
           </Text>
         </View>
+
+        {isTranscribing && (
+          <View style={styles.resultSection}>
+            <ActivityIndicator size="large" color={Colors.primary.main} />
+            <Text style={[styles.transcribingText, { color: theme.colors.onSurfaceVariant }]}>
+              Ovoz tahlil qilinmoqda...
+            </Text>
+          </View>
+        )}
+
+        {errorMessage && !isTranscribing && (
+          <View style={[styles.resultCard, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.errorText, { color: Colors.error.main }]}>
+              {errorMessage}
+            </Text>
+          </View>
+        )}
+
+        {transcriptionText && !isTranscribing && (
+          <View style={[styles.resultCard, { backgroundColor: theme.colors.surface }]}>
+            <Text style={[styles.resultLabel, { color: theme.colors.onSurfaceVariant }]}>
+              Natija:
+            </Text>
+            <Text style={[styles.transcriptionResult, { color: theme.colors.onSurface }]}>
+              {transcriptionText}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -136,5 +229,37 @@ const styles = StyleSheet.create({
   buttonHint: {
     fontSize: 13,
     marginTop: 16,
+  },
+  resultSection: {
+    marginTop: 40,
+    alignItems: 'center',
+  },
+  transcribingText: {
+    fontSize: 14,
+    marginTop: 12,
+  },
+  resultCard: {
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 30,
+    width: '100%',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+  },
+  errorText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  resultLabel: {
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  transcriptionResult: {
+    fontSize: 18,
+    textAlign: 'right',
+    lineHeight: 28,
   },
 });

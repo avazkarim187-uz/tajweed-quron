@@ -2,7 +2,7 @@
   "id": "FEAT-004",
   "type": "feat",
   "description": "Implement voice recording with expo-av, OpenAI Whisper API integration for speech-to-text, tajweed analysis logic, and progress tracking with AsyncStorage persistence",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create src/services/audioRecorder.ts - wrapper around expo-av Audio.Recording with methods: startRecording (request permissions, configure high quality m4a recording, start), stopRecording (stop and get URI), getRecordingStatus (duration, isRecording). Use Audio.RecordingOptionsPresets.HIGH_QUALITY.",
     "Create src/services/whisperApi.ts - OpenAI Whisper API integration: transcribeAudio function that takes audio file URI and API key, creates multipart/form-data with the audio file, model='whisper-1', language='ar', sends POST to https://api.openai.com/v1/audio/transcriptions, returns transcription text. Handle errors gracefully.",

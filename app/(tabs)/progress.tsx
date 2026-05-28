@@ -1,20 +1,29 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '../../src/contexts/ThemeContext';
+import { useProgress } from '../../src/contexts/ProgressContext';
 import { Colors } from '../../src/constants/colors';
 import { ScoreCircle } from '../../src/components/ScoreCircle';
 import { tajweedRules } from '../../src/data/tajweedRules';
 
 const weekDays = ['Du', 'Se', 'Chor', 'Pay', 'Ju', 'Sha', 'Yak'];
-const weeklyActivity = [3, 5, 2, 7, 4, 0, 1];
 
 export default function ProgressScreen() {
   const { theme } = useTheme();
+  const {
+    progress,
+    getOverallScore,
+    getWeeklyActivity,
+    getStreak,
+    getMasteredRulesCount,
+    getProgressForRule,
+  } = useProgress();
 
-  const overallScore = 68;
-  const totalAttempts = 24;
-  const rulesMastered = 2;
-  const daysActive = 5;
+  const overallScore = getOverallScore();
+  const weeklyActivity = getWeeklyActivity();
+  const streak = getStreak();
+  const masteredCount = getMasteredRulesCount();
+  const totalAttempts = progress.reduce((sum, p) => sum + p.totalAttempts, 0);
 
   return (
     <ScrollView
@@ -35,12 +44,12 @@ export default function ProgressScreen() {
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: Colors.secondary.main }]}>{rulesMastered}</Text>
+          <Text style={[styles.statValue, { color: Colors.secondary.main }]}>{masteredCount}</Text>
           <Text style={[styles.statLabel, { color: theme.colors.onSurfaceVariant }]}>O'zlashtirilgan</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: Colors.tertiary.main }]}>{daysActive}</Text>
+          <Text style={[styles.statValue, { color: Colors.tertiary.main }]}>{streak}</Text>
           <Text style={[styles.statLabel, { color: theme.colors.onSurfaceVariant }]}>Kun faol</Text>
         </View>
       </View>
@@ -78,8 +87,9 @@ export default function ProgressScreen() {
         Qoidalar bo'yicha
       </Text>
       {tajweedRules.map((rule) => {
-        const ruleScore = Math.floor(Math.random() * 100);
-        const ruleAttempts = Math.floor(Math.random() * 10);
+        const ruleProgress = getProgressForRule(rule.id);
+        const ruleScore = ruleProgress?.practiceScore || 0;
+        const ruleAttempts = ruleProgress?.totalAttempts || 0;
         return (
           <View
             key={rule.id}
