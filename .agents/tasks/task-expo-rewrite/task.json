@@ -1,0 +1,7 @@
+{
+  "task_id": "task-expo-rewrite",
+  "task_description": "Rewrite the AI Tajweed Ustoz app from native Android (Kotlin/Jetpack Compose) to Expo (React Native/TypeScript). Delete all Android files and create a complete Expo project with the same features: 12 tajweed rules lessons, 7 surahs with ayahs, voice recording with OpenAI Whisper API, real-time tajweed feedback, practice mode, progress tracking, settings with API key config, Islamic green/gold theme with light/dark mode support.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004", "FEAT-005"],
+  "blocked_reason": null
+}

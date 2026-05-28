@@ -1,0 +1,35 @@
+{
+  "id": "FEAT-004",
+  "type": "feat",
+  "description": "Implement voice recording with expo-av, OpenAI Whisper API integration for speech-to-text, tajweed analysis logic, and progress tracking with AsyncStorage persistence",
+  "status": "pending",
+  "steps": [
+    "Create src/services/audioRecorder.ts - wrapper around expo-av Audio.Recording with methods: startRecording (request permissions, configure high quality m4a recording, start), stopRecording (stop and get URI), getRecordingStatus (duration, isRecording). Use Audio.RecordingOptionsPresets.HIGH_QUALITY.",
+    "Create src/services/whisperApi.ts - OpenAI Whisper API integration: transcribeAudio function that takes audio file URI and API key, creates multipart/form-data with the audio file, model='whisper-1', language='ar', sends POST to https://api.openai.com/v1/audio/transcriptions, returns transcription text. Handle errors gracefully.",
+    "Create src/services/tajweedAnalyzer.ts - analyzes transcription against expected text: compareTexts function that takes expected Arabic text and transcribed text, calculates similarity score (0-100), identifies specific errors/mismatches, returns TajweedAnalysisResult with score, errors array (with position and type), and suggestions. Include Arabic text normalization (remove tashkeel for comparison).",
+    "Create src/contexts/ProgressContext.tsx - React Context for progress state: loads UserProgress array from AsyncStorage on mount, provides methods to updateProgress(ruleId, score), markLessonComplete(ruleId), getProgressForRule(ruleId), getOverallScore(), getWeeklyActivity(), getStreak(). Persists all changes to AsyncStorage.",
+    "Create src/contexts/RecordingContext.tsx - React Context for recording state: manages current recording session, stores RecordingResult array in AsyncStorage, provides startSession, endSession, saveResult methods",
+    "Update PracticeSessionScreen to wire up recording flow: tap record -> audioRecorder.startRecording -> tap stop -> audioRecorder.stopRecording -> whisperApi.transcribeAudio -> tajweedAnalyzer.compareTexts -> display score and errors -> save to progress",
+    "Update RecordingScreen to use the recording service for general ayah recording",
+    "Update ProgressScreen to read real data from ProgressContext (overall score, weekly activity, per-rule stats)"
+  ],
+  "acceptance_criteria": [
+    "src/services/audioRecorder.ts exports startRecording, stopRecording, getRecordingStatus functions using expo-av",
+    "src/services/whisperApi.ts exports transcribeAudio function that properly constructs multipart request to OpenAI API",
+    "src/services/tajweedAnalyzer.ts exports compareTexts function with Arabic normalization and scoring logic",
+    "src/contexts/ProgressContext.tsx provides full progress tracking with AsyncStorage persistence",
+    "src/contexts/RecordingContext.tsx manages recording sessions and results",
+    "PracticeSessionScreen has complete recording -> transcription -> analysis -> feedback flow",
+    "ProgressScreen shows real progress data from context",
+    "All API calls handle errors gracefully with user-friendly messages in Uzbek"
+  ],
+  "verification": [
+    "Verify audioRecorder.ts imports from expo-av and uses Audio.Recording API correctly",
+    "Verify whisperApi.ts constructs proper FormData with file, model, and language fields",
+    "Verify tajweedAnalyzer.ts includes Arabic text normalization (tashkeel removal regex)",
+    "Verify ProgressContext reads from and writes to AsyncStorage",
+    "Verify PracticeSessionScreen connects recording -> API -> analysis -> display flow"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

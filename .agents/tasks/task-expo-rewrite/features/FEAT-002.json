@@ -1,0 +1,32 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Implement data layer: TypeScript models/interfaces, static Tajweed rules data (all 12 rules), Quran data (all 7 surahs with ayahs), color constants, theme system with light/dark mode, and AsyncStorage service",
+  "status": "pending",
+  "steps": [
+    "Create src/data/models.ts with TypeScript interfaces: TajweedRule (id, name, nameUz, description, arabicExample, explanation, audioUrl, category, lettersList), QuranAyah (id, surahNumber, surahName, surahNameUz, ayahNumber, arabicText, transliterationUz, translationUz, tajweedRuleIds, page), UserProgress (id, ruleId, lessonCompleted, practiceScore, lastPracticeDate, totalAttempts, successfulAttempts), RecordingResult (id, ruleId, ayahId, audioPath, transcription, score, errors, timestamp), PracticeSession (ruleId, ayahText, expectedPronunciation, attempts, bestScore)",
+    "Create src/data/tajweedRules.ts - port ALL 12 tajweed rules from TajweedData.kt with exact Arabic examples, Uzbek descriptions, explanations, categories, and letter lists",
+    "Create src/data/quranData.ts - port ALL 7 surahs from QuranData.kt: Al-Fatiha (7 ayahs, page 1), Ya-Sin (5 ayahs, page 440), Al-Mulk (5 ayahs, page 562), Al-Kawthar (3 ayahs, page 602), Al-Ikhlas (4 ayahs, page 604), Al-Falaq (5 ayahs, page 604), An-Nas (6 ayahs, page 604) with all fields including transliterationUz, translationUz, tajweedRuleIds, page numbers",
+    "Create src/constants/colors.ts with all theme colors from Color.kt: Primary (deep green #1B5E20, #2E7D32, #4CAF50), Secondary (gold #F9A825, #FFC107), Tertiary (blue #1565C0), Surface, Error colors, and all 7 Tajweed rule colors (Izhor green, Idghom blue, Ikhfo orange, Iqlab purple, Ghunna red, Qalqala brown, Madd teal)",
+    "Create src/constants/theme.ts with light and dark theme objects using the color palette, typography scales, and spacing constants",
+    "Create src/contexts/ThemeContext.tsx with React Context providing current theme, isDark toggle, and theme mode (light/dark/system) using useColorScheme hook",
+    "Create src/services/storage.ts using AsyncStorage with typed methods: saveProgress, getProgress, saveApiKey, getApiKey, saveRecordingResult, getRecordingResults, saveSettings, getSettings, clearAll"
+  ],
+  "acceptance_criteria": [
+    "src/data/models.ts exports all 5 TypeScript interfaces matching the original Kotlin data classes",
+    "src/data/tajweedRules.ts exports array of 12 TajweedRule objects with complete Arabic/Uzbek content",
+    "src/data/quranData.ts exports array of 35 QuranAyah objects across 7 surahs with page numbers",
+    "src/constants/colors.ts exports all color values matching the original Color.kt hex values",
+    "src/constants/theme.ts exports light and dark theme objects",
+    "src/contexts/ThemeContext.tsx provides working theme context with mode switching",
+    "src/services/storage.ts provides complete AsyncStorage abstraction with all CRUD operations"
+  ],
+  "verification": [
+    "Verify tajweedRules.ts contains exactly 12 rules with IDs 1-12",
+    "Verify quranData.ts contains surahs 1, 36, 67, 108, 112, 113, 114 with correct page numbers",
+    "Verify color hex values match original: TajweedIzhor=#4CAF50, TajweedIdghom=#2196F3, TajweedIkhfo=#FF9800, TajweedIqlab=#9C27B0, TajweedGhunna=#F44336, TajweedQalqala=#795548, TajweedMadd=#009688",
+    "Verify all TypeScript files have proper type annotations and exports"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

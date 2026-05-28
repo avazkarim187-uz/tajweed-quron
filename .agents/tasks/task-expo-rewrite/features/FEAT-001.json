@@ -1,0 +1,39 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Delete all existing Android-specific files and set up the Expo React Native project scaffolding with proper package.json, tsconfig, app.json, and directory structure",
+  "status": "in_progress",
+  "steps": [
+    "Delete ALL existing Android files: app/ directory, build.gradle.kts, settings.gradle.kts, gradle/ directory, gradlew, gradlew.bat, .agents/ task files (keep .git)",
+    "Create package.json with all dependencies: expo ~51.0.0, expo-router ~3.5.0, expo-av ~14.0.0, @react-native-async-storage/async-storage ~1.23.0, react-native, react, typescript, @expo/vector-icons, expo-status-bar, react-native-safe-area-context, react-native-screens, expo-linking, expo-constants, expo-font",
+    "Create tsconfig.json extending expo/tsconfig.base with strict mode",
+    "Create app.json with Expo config: name 'AI Tajweed Ustoz', slug 'tajweed-ustoz', scheme 'tajweed', iOS/Android config, plugins for expo-router and expo-av",
+    "Create babel.config.js with expo preset and expo-router/babel plugin",
+    "Create app/_layout.tsx as root layout with expo-router Stack/Tabs navigation",
+    "Create app/(tabs)/_layout.tsx with bottom tab navigation (Home, Darslar, Quran, Mashq, Progress)",
+    "Create placeholder screens: app/(tabs)/index.tsx, app/(tabs)/lessons.tsx, app/(tabs)/quran.tsx, app/(tabs)/practice.tsx, app/(tabs)/progress.tsx",
+    "Create app/settings.tsx and app/lesson/[id].tsx, app/quran/[surahNumber].tsx, app/practice/[ruleId].tsx, app/recording.tsx, app/feedback/[id].tsx as stack screens",
+    "Create src/ directory structure: src/data/, src/services/, src/contexts/, src/components/, src/constants/",
+    "Create .gitignore for Node/Expo project (node_modules, .expo, dist, etc.)"
+  ],
+  "acceptance_criteria": [
+    "No Android-specific files remain (no app/build.gradle.kts, no gradle/, no .kt files)",
+    "package.json exists with all required Expo dependencies",
+    "tsconfig.json exists and extends expo/tsconfig.base",
+    "app.json exists with proper Expo configuration",
+    "app/_layout.tsx exists as root layout",
+    "app/(tabs)/_layout.tsx exists with 5 bottom tabs",
+    "All placeholder screen files exist",
+    "src/ directory structure exists with data/, services/, contexts/, components/, constants/ subdirectories",
+    ".gitignore excludes node_modules and .expo"
+  ],
+  "verification": [
+    "Verify no .kt, .gradle, .gradle.kts files exist in the project",
+    "Verify package.json is valid JSON with correct dependency versions",
+    "Verify app.json is valid JSON",
+    "Verify tsconfig.json is valid JSON",
+    "Verify all expected files exist by listing the directory tree"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

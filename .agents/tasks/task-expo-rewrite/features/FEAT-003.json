@@ -1,0 +1,47 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Implement all screens with complete UI: Home (welcome, stats, quick actions), Lessons list and detail, Quran surah list and reader, Practice list and session with recording, Progress tracking with weekly activity, Settings with API key and theme configuration",
+  "status": "pending",
+  "steps": [
+    "Create src/components/ArabicText.tsx - styled component for RTL Arabic text with proper font size and alignment",
+    "Create src/components/TajweedColorText.tsx - component that color-codes Arabic text based on tajweed rules (using rule colors from constants)",
+    "Create src/components/ScoreCircle.tsx - circular progress indicator showing percentage score",
+    "Create src/components/RecordingButton.tsx - animated recording button with pulse effect (red when recording)",
+    "Implement app/(tabs)/index.tsx (HomeScreen) - welcome header 'Assalomu alaykum!', daily stats card (completed rules, streak, overall score), continue last lesson button, quick action cards (Darslar, Quran, Mashq), recent results list",
+    "Implement app/(tabs)/lessons.tsx (LessonsListScreen) - scrollable list of 12 tajweed rules as cards showing rule name (Arabic + Uzbek), category badge, brief description, tap to navigate to detail",
+    "Implement app/lesson/[id].tsx (LessonDetailScreen) - full lesson view with Arabic name, Uzbek name, detailed explanation, Arabic examples with tajweed color coding, letters list, practice button to navigate to practice session",
+    "Implement app/(tabs)/quran.tsx (QuranScreen) - surah list showing surah number, Arabic name, Uzbek name, ayah count, page number; tap to navigate to reader",
+    "Implement app/quran/[surahNumber].tsx (QuranReaderScreen) - display all ayahs of selected surah: Arabic text (large, RTL), transliteration, Uzbek translation, tajweed rule tags, record button per ayah",
+    "Implement app/(tabs)/practice.tsx (PracticeListScreen) - list of 12 rules available for practice, showing rule name and current score/attempts from progress",
+    "Implement app/practice/[ruleId].tsx (PracticeSessionScreen) - show random ayah with that tajweed rule, large Arabic text, record button, after recording show score and feedback with color-coded errors",
+    "Implement app/(tabs)/progress.tsx (ProgressScreen) - overall score circle, total attempts, rules mastered count, weekly activity chart (7 day bars), per-rule progress cards with score bars",
+    "Implement app/settings.tsx (SettingsScreen) - API key input (password field with save button), theme selector (Light/Dark/System), notifications toggle, clear data button with confirmation dialog, about section (version, description)",
+    "Implement app/recording.tsx (RecordingScreen) - general recording screen for any ayah, shows selected ayah text, record/stop button with timer, sends to Whisper API, shows transcription result",
+    "Implement app/feedback/[id].tsx (FeedbackScreen) - shows recording result with score circle, original text vs transcribed text comparison, error highlights with tajweed colors, retry button"
+  ],
+  "acceptance_criteria": [
+    "HomeScreen shows welcome, stats, quick actions, and navigates correctly",
+    "LessonsListScreen displays all 12 tajweed rules with Arabic names and Uzbek descriptions",
+    "LessonDetailScreen shows full lesson content with Arabic examples",
+    "QuranScreen lists all 7 surahs with page numbers",
+    "QuranReaderScreen shows ayahs with Arabic text, transliteration, translation",
+    "PracticeListScreen shows all 12 rules with progress indicators",
+    "PracticeSessionScreen allows recording and shows feedback",
+    "ProgressScreen displays overall stats and per-rule progress",
+    "SettingsScreen allows API key configuration, theme switching, and data clearing",
+    "All screens use the Islamic green/gold theme colors",
+    "All UI text is in Uzbek language",
+    "Arabic text displays RTL correctly",
+    "Navigation between all screens works via expo-router"
+  ],
+  "verification": [
+    "Verify all screen files exist in correct locations under app/ directory",
+    "Verify all component files exist under src/components/",
+    "Verify screens import and use the data from src/data/ (tajweedRules, quranData)",
+    "Verify theme colors are used consistently across screens",
+    "Verify expo-router navigation (useRouter, Link, useLocalSearchParams) is used correctly"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

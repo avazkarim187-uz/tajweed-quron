@@ -1,0 +1,24 @@
+{
+  "project_type": "Expo React Native app (rewrite from native Android Kotlin/Jetpack Compose)",
+  "language": "TypeScript",
+  "build_system": "Expo CLI with npm/yarn - greenfield Expo SDK 51 project",
+  "test_framework": "None initially - focus on creating working app",
+  "build_command": "npx expo export --platform web (for validation without device)",
+  "test_command": "npx tsc --noEmit (TypeScript type checking)",
+  "verification_instructions": "1. Check TypeScript compiles without errors (npx tsc --noEmit). 2. Verify project structure matches Expo conventions. 3. Ensure package.json has all needed dependencies.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "User will run: npm install && npx expo start on their machine",
+  "environment_constraints": "INTEGRATIONS_ONLY network mode - cannot run npm install, npx expo start, or any network-dependent commands. Create all source files with correct package.json so the user can run npm install on their machine. Validate by reading files and checking TypeScript syntax manually.",
+  "contribution_requirements": "README.md must be in Uzbek language. All UI text in Uzbek. Arabic text for Quran/Tajweed content.",
+  "key_patterns": "expo-router for file-based routing (app/ directory), AsyncStorage for persistence, expo-av for audio recording, React Context for state management, TypeScript interfaces for data models",
+  "relevant_files": [
+    "app/src/main/java/com/tajweed/ustoz/data/local/TajweedData.kt - 12 tajweed rules with Arabic examples and Uzbek descriptions",
+    "app/src/main/java/com/tajweed/ustoz/data/local/QuranData.kt - 7 surahs with ayahs, translations, page numbers",
+    "app/src/main/java/com/tajweed/ustoz/data/model/ - TajweedRule, QuranAyah, UserProgress, RecordingResult, PracticeSession models",
+    "app/src/main/java/com/tajweed/ustoz/data/remote/WhisperApiService.kt - OpenAI Whisper API integration",
+    "app/src/main/java/com/tajweed/ustoz/ui/theme/Color.kt - Islamic green/gold color palette and tajweed rule colors",
+    "app/src/main/java/com/tajweed/ustoz/ui/screens/ - all screen implementations",
+    "app/src/main/java/com/tajweed/ustoz/navigation/Screen.kt - navigation routes"
+  ],
+  "directory_structure": "Will create standard Expo project: app/ (expo-router pages), src/data/ (models and static data), src/services/ (API, storage), src/contexts/ (React contexts), src/components/ (reusable UI), src/constants/ (colors, theme), assets/"
+}
