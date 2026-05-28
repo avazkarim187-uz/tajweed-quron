@@ -10,22 +10,57 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF4CAF50),
-    secondary = Color(0xFF81C784),
-    tertiary = Color(0xFFA5D6A7)
+private val LightColorScheme = lightColorScheme(
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = OnPrimaryContainer,
+    secondary = Secondary,
+    onSecondary = OnSecondary,
+    secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = OnSecondaryContainer,
+    tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = TertiaryContainer,
+    onTertiaryContainer = OnTertiaryContainer,
+    error = Error,
+    errorContainer = ErrorContainer,
+    onErrorContainer = OnErrorContainer,
+    background = Background,
+    onBackground = OnSurface,
+    surface = Surface,
+    onSurface = OnSurface,
+    surfaceVariant = SurfaceVariant,
+    onSurfaceVariant = OnSurfaceVariant
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF2E7D32),
-    secondary = Color(0xFF4CAF50),
-    tertiary = Color(0xFF81C784)
+private val DarkColorScheme = darkColorScheme(
+    primary = PrimaryLight,
+    onPrimary = PrimaryDark,
+    primaryContainer = PrimaryDark,
+    onPrimaryContainer = PrimaryContainer,
+    secondary = SecondaryLight,
+    onSecondary = OnSecondary,
+    secondaryContainer = OnSecondaryContainer,
+    onSecondaryContainer = SecondaryContainer,
+    tertiary = TertiaryLight,
+    onTertiary = OnTertiaryContainer,
+    tertiaryContainer = OnTertiaryContainer,
+    onTertiaryContainer = TertiaryContainer,
+    error = Error,
+    errorContainer = OnErrorContainer,
+    onErrorContainer = ErrorContainer,
+    background = BackgroundDark,
+    onBackground = OnSurfaceDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = OnSurfaceDark
 )
 
 @Composable
@@ -54,6 +89,8 @@ fun TajweedUstodTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = Typography,
+        shapes = Shapes,
         content = content
     )
 }

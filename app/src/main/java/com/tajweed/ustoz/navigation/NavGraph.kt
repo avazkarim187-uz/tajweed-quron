@@ -11,6 +11,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.tajweed.ustoz.ui.screens.home.HomeScreen
+import com.tajweed.ustoz.ui.screens.lessons.LessonDetailScreen
+import com.tajweed.ustoz.ui.screens.lessons.LessonsListScreen
+import com.tajweed.ustoz.ui.screens.quran.QuranReaderScreen
+import com.tajweed.ustoz.ui.screens.quran.QuranScreen
 
 @Composable
 fun NavGraph(
@@ -23,11 +28,28 @@ fun NavGraph(
         modifier = modifier
     ) {
         composable(Screen.Home.route) {
-            PlaceholderScreen("Bosh sahifa")
+            HomeScreen(
+                onNavigateToLessons = {
+                    navController.navigate(Screen.LessonsList.route)
+                },
+                onNavigateToQuran = {
+                    navController.navigate(Screen.Quran.route)
+                },
+                onNavigateToPractice = {
+                    navController.navigate(Screen.Practice.route)
+                },
+                onNavigateToLesson = { ruleId ->
+                    navController.navigate(Screen.LessonDetail.createRoute(ruleId))
+                }
+            )
         }
 
         composable(Screen.LessonsList.route) {
-            PlaceholderScreen("Darslar ro'yxati")
+            LessonsListScreen(
+                onLessonClick = { ruleId ->
+                    navController.navigate(Screen.LessonDetail.createRoute(ruleId))
+                }
+            )
         }
 
         composable(
@@ -35,11 +57,21 @@ fun NavGraph(
             arguments = listOf(navArgument("ruleId") { type = NavType.IntType })
         ) { backStackEntry ->
             val ruleId = backStackEntry.arguments?.getInt("ruleId") ?: 0
-            PlaceholderScreen("Dars tafsiloti: $ruleId")
+            LessonDetailScreen(
+                ruleId = ruleId,
+                onBackClick = { navController.popBackStack() },
+                onPracticeClick = { id ->
+                    navController.navigate(Screen.PracticeSession.createRoute(id))
+                }
+            )
         }
 
         composable(Screen.Quran.route) {
-            PlaceholderScreen("Qur'on")
+            QuranScreen(
+                onSurahClick = { surahNumber ->
+                    navController.navigate(Screen.QuranReader.createRoute(surahNumber))
+                }
+            )
         }
 
         composable(
@@ -47,7 +79,13 @@ fun NavGraph(
             arguments = listOf(navArgument("surahNumber") { type = NavType.IntType })
         ) { backStackEntry ->
             val surahNumber = backStackEntry.arguments?.getInt("surahNumber") ?: 1
-            PlaceholderScreen("Sura: $surahNumber")
+            QuranReaderScreen(
+                surahNumber = surahNumber,
+                onBackClick = { navController.popBackStack() },
+                onRecordClick = { ayahId ->
+                    navController.navigate(Screen.Recording.createRoute(ayahId))
+                }
+            )
         }
 
         composable(Screen.Practice.route) {

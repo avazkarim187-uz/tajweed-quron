@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.tajweed.ustoz.data.local.DatabaseCallback
 import com.tajweed.ustoz.data.local.QuranAyahDao
 import com.tajweed.ustoz.data.local.RecordingResultDao
 import com.tajweed.ustoz.data.local.TajweedDatabase
@@ -16,25 +17,44 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class ApplicationScope
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    @ApplicationScope
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): TajweedDatabase {
+    fun provideApplicationScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob())
+    }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        callback: DatabaseCallback
+    ): TajweedDatabase {
         return Room.databaseBuilder(
             context,
             TajweedDatabase::class.java,
             Constants.DATABASE_NAME
-        ).build()
+        )
+            .addCallback(callback)
+            .build()
     }
 
     @Provides
