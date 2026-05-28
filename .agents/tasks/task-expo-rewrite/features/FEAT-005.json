@@ -2,7 +2,7 @@
   "id": "FEAT-005",
   "type": "docs",
   "description": "Update README.md with complete Expo setup instructions in Uzbek language, covering installation, running, project structure, and features",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Replace README.md content with Expo-focused documentation in Uzbek: project title and description, features list (same 9 features), tech stack (Expo SDK 51, React Native, TypeScript, expo-av, expo-router, AsyncStorage, OpenAI Whisper API), prerequisites (Node.js 18+, npm or yarn, Expo Go app on phone), setup steps (git clone, npm install, npx expo start, scan QR code), project structure (app/ for screens, src/ for logic), API setup instructions, tajweed colors table, screens list, contributing guide",
     "Ensure all section headers and descriptions are in Uzbek language",

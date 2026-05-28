@@ -2,133 +2,117 @@
 
 ## Ilova haqida (About)
 
-AI Tajweed Ustoz - bu sun'iy intellekt yordamida Qur'on tilovati va tajvid qoidalarini o'rgatuvchi Android ilovasi.
+AI Tajweed Ustoz - bu sun'iy intellekt yordamida Qur'on tilovati va tajvid qoidalarini o'rgatuvchi React Native/Expo ilovasi. Ilova OpenAI Whisper API orqali foydalanuvchining ovozini tahlil qilib, tajvid qoidalariga rioya qilishni baholaydi va xatolarni real-time ko'rsatadi.
 
 ## Xususiyatlar (Features)
 
 - 12 ta tajvid qoidalari darslari (Izhor, Idg'om, Ikhfo, Iqlab, Ghunna, Qalqala, Madd va boshqalar)
-- Qur'on oyatlari (Fotiha, Yosin, Mulk, Ixlos, Falaq, Nos, Kavsar suralari)
+- Qur'on oyatlari (Fotiha, Yosin, Mulk, Kavsar, Ixlos, Falaq, Nos suralari) bet raqamlari bilan
 - Ovozni yozib olish va AI tahlili (OpenAI Whisper API)
 - Real-time tajvid xatolari ko'rsatish (rangli belgilash)
 - Har bir qoida bo'yicha mashq rejimi
-- Progress tracking (o'sish kuzatuvi)
-- Firebase autentifikatsiya va sinxronlash
-- Offline rejim (Room DB)
+- Progress tracking (o'sish kuzatuvi) - haftalik faollik
+- Sozlamalar (API kalit, mavzu sozlash)
+- Zamonaviy UI - islomiy yashil/oltin rang palitrasi
+- Yorug'/Qorong'u mavzu qo'llab-quvvatlash
 
 ## Tech Stack
 
-- Kotlin + Jetpack Compose (Native Android)
-- OpenAI Whisper API (nutqni matnga o'girish)
-- Firebase (Auth, Firestore, Storage)
-- Room DB (mahalliy ma'lumotlar bazasi)
-- Hilt (Dependency Injection)
-- Material3 Design
+- Expo SDK 51
+- React Native + TypeScript
+- expo-av (audio yozib olish)
+- expo-router (navigatsiya)
+- AsyncStorage (mahalliy ma'lumotlar)
+- OpenAI Whisper API (nutqni tahlil qilish)
+- React Context (holat boshqaruvi)
 
 ## O'rnatish (Setup)
 
 ### Talablar (Requirements)
 
-- Android Studio Hedgehog (2023.1.1) yoki undan yuqori
-- JDK 17
-- Android SDK 34
-- Min Android 7.0 (API 24)
+- Node.js 18 yoki undan yuqori
+- npm yoki yarn
+- Expo Go ilovasi (telefonda)
 
 ### Qadamlar (Steps)
 
-1. Repositoriyani klonlash:
+1. Repositoriyani klonlash va ishga tushirish:
 
 ```bash
 git clone https://github.com/avazkarim187-uz/tajweed-quron.git
+cd tajweed-quron
+npm install
+npx expo start
 ```
 
-2. Android Studio'da ochish
+2. Telefonda Expo Go ilovasini oching va QR kodni skanerlang.
 
-3. Firebase sozlash:
-   - https://console.firebase.google.com/ ga o'ting
-   - Yangi loyiha yarating
-   - Android ilovani qo'shing (package: com.tajweed.ustoz)
-   - google-services.json ni yuklab oling
-   - app/google-services.json faylni almashtiring
-   - Authentication bo'limida Email/Password va Google Sign-In ni yoqing
-   - Firestore Database yarating
+## OpenAI API sozlash
 
-4. OpenAI API kalitini olish:
-   - https://platform.openai.com/ ga o'ting
-   - API kalit yarating
-   - Ilovada Settings -> API sozlamalari orqali kiriting
-
-5. Gradle Sync va Run
+1. https://platform.openai.com/ ga o'ting
+2. API kalit yarating
+3. Ilovada Sozlamalar -> API kalitni kiriting
 
 ## Loyiha tuzilmasi (Project Structure)
 
 ```
-app/src/main/java/com/tajweed/ustoz/
-├── data/           - modellar, Room DB, repository, remote services
-│   ├── local/      - Room DAO, database, converters
-│   ├── model/      - data class'lar (TajweedRule, QuranAyah, etc.)
-│   ├── remote/     - Firebase, Whisper API service
-│   └── repository/ - repository interface va implementation
-├── di/             - Hilt dependency injection modullari
-├── domain/         - use case'lar
-├── navigation/     - ekranlar va navigatsiya
-└── ui/             - Jetpack Compose ekranlar va komponentlar
-    ├── components/ - qayta ishlatiladigan UI komponentlar
-    ├── screens/    - barcha ekranlar (home, lessons, quran, practice, recording, progress, settings, auth)
-    └── theme/      - rang, tipografiya, shakl, mavzu
+tajweed-quron/
+├── app/                    - Expo Router sahifalar
+│   ├── (tabs)/            - Tab navigatsiya ekranlari
+│   │   ├── index.tsx      - Bosh sahifa
+│   │   ├── lessons.tsx    - Darslar ro'yxati
+│   │   ├── quran.tsx      - Qur'on suralari
+│   │   ├── practice.tsx   - Mashq ro'yxati
+│   │   └── progress.tsx   - O'sish
+│   ├── lesson/[id].tsx    - Dars tafsiloti
+│   ├── quran/[surahNumber].tsx - Sura o'qish
+│   ├── practice/[ruleId].tsx   - Mashq sessiyasi
+│   ├── recording.tsx      - Ovoz yozish
+│   ├── feedback/[id].tsx  - Natija
+│   └── settings.tsx       - Sozlamalar
+├── src/
+│   ├── components/        - Qayta ishlatiladigan komponentlar
+│   ├── constants/         - Ranglar va mavzu
+│   ├── contexts/          - React Context'lar
+│   ├── data/              - Tajvid qoidalari va Qur'on ma'lumotlari
+│   └── services/          - API va xizmatlar
+├── app.json               - Expo konfiguratsiya
+├── package.json           - Bog'liqliklar
+└── tsconfig.json          - TypeScript sozlamalari
 ```
 
 ## Tajvid ranglari (Tajweed Colors)
 
 | Rang | Qoida | Tavsif |
 |------|-------|--------|
-| Yashil | Izhor | Aniq o'qish |
-| Ko'k | Idg'om | Qo'shish |
-| To'q sariq | Ikhfo | Yashirish |
-| Binafsha | Iqlab | Aylantirish |
-| Qizil | Ghunna | Burun ovozi |
-| Jigarrang | Qalqala | Qaltirash |
-| Zangori | Madd | Cho'zish |
+| Yashil (#4CAF50) | Izhor | Aniq o'qish |
+| Ko'k (#2196F3) | Idg'om | Qo'shish |
+| To'q sariq (#FF9800) | Ikhfo | Yashirish |
+| Binafsha (#9C27B0) | Iqlab | Aylantirish |
+| Qizil (#F44336) | Ghunna | Burun ovozi |
+| Jigarrang (#795548) | Qalqala | Qaltirash |
+| Zangori (#009688) | Madd | Cho'zish |
 
 ## Ekranlar (Screens)
 
-1. **Bosh sahifa** - Tezkor navigatsiya, kundalik mashq, so'nggi natijalar
-2. **Darslar** - 12 ta tajvid qoidalari, har biri misollar bilan
-3. **Qur'on** - Suralar ro'yxati, oyatlarni o'qish va yozib olish
+1. **Bosh sahifa** - Tezkor navigatsiya, kundalik mashq, statistika
+2. **Darslar** - 12 ta tajvid qoidalari, misollar bilan
+3. **Qur'on** - Suralar ro'yxati, oyatlarni o'qish, bet raqamlari
 4. **Mashq** - Qoida bo'yicha mashq, yozib olish va AI tahlili
 5. **O'sish** - Umumiy ball, haftalik faollik, qoida bo'yicha natijalar
-6. **Sozlamalar** - Til, mavzu, API kalit, hisob boshqaruvi
-
-## API Integratsiya
-
-### OpenAI Whisper API
-
-Ilova OpenAI Whisper API'dan foydalanib ovozli yozuvlarni matnga o'giradi va tajvid tahlilini amalga oshiradi.
-
-```
-POST https://api.openai.com/v1/audio/transcriptions
-Authorization: Bearer YOUR_API_KEY
-Content-Type: multipart/form-data
-```
-
-### Firebase
-
-- **Authentication**: Email/password va Google Sign-In
-- **Firestore**: Foydalanuvchi progressini sinxronlash
-- **Storage**: Audio fayllarni saqlash (kelajakda)
+6. **Sozlamalar** - API kalit, mavzu, ma'lumotlarni tozalash
 
 ## Ishga tushirish (Running)
 
 ```bash
-./gradlew assembleDebug
-./gradlew installDebug
+npx expo start
 ```
 
-## Testlar (Testing)
+Development build yoki Expo Go ilovasi orqali ishga tushirishingiz mumkin. Expo Go ilovasida QR kodni skanerlang va ilova telefoningizda ishga tushadi.
 
-```bash
-./gradlew test
-./gradlew connectedAndroidTest
-```
+## Eslatma (Note)
+
+Firebase integratsiyasi keyinchalik qo'shilishi mumkin. Hozircha barcha ma'lumotlar AsyncStorage orqali mahalliy saqlanadi.
 
 ## Hissa qo'shish (Contributing)
 
