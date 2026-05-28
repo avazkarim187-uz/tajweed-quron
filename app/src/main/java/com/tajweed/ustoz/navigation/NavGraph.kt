@@ -1,25 +1,25 @@
 package com.tajweed.ustoz.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.tajweed.ustoz.ui.screens.auth.LoginScreen
+import com.tajweed.ustoz.ui.screens.auth.RegisterScreen
 import com.tajweed.ustoz.ui.screens.home.HomeScreen
 import com.tajweed.ustoz.ui.screens.lessons.LessonDetailScreen
 import com.tajweed.ustoz.ui.screens.lessons.LessonsListScreen
 import com.tajweed.ustoz.ui.screens.practice.PracticeListScreen
 import com.tajweed.ustoz.ui.screens.practice.PracticeScreen
+import com.tajweed.ustoz.ui.screens.progress.ProgressScreen
 import com.tajweed.ustoz.ui.screens.quran.QuranReaderScreen
 import com.tajweed.ustoz.ui.screens.quran.QuranScreen
 import com.tajweed.ustoz.ui.screens.recording.FeedbackScreen
 import com.tajweed.ustoz.ui.screens.recording.RecordingScreen
+import com.tajweed.ustoz.ui.screens.settings.SettingsScreen
 
 @Composable
 fun NavGraph(
@@ -136,29 +136,37 @@ fun NavGraph(
         }
 
         composable(Screen.Progress.route) {
-            PlaceholderScreen("Jarayon")
+            ProgressScreen()
         }
 
         composable(Screen.Settings.route) {
-            PlaceholderScreen("Sozlamalar")
+            SettingsScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route)
+                }
+            )
         }
 
         composable(Screen.Login.route) {
-            PlaceholderScreen("Kirish")
+            LoginScreen(
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register.route)
+                },
+                onLoginSuccess = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable(Screen.Register.route) {
-            PlaceholderScreen("Ro'yxatdan o'tish")
+            RegisterScreen(
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                },
+                onRegisterSuccess = {
+                    navController.popBackStack(Screen.Settings.route, false)
+                }
+            )
         }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(name: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = name)
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary -->
+    <color name="primary">#FF1B5E20</color>
+    <color name="primary_light">#FF4CAF50</color>
+    <color name="secondary">#FFF9A825</color>
+    <color name="tertiary">#FF1565C0</color>
+
+    <!-- Tajweed rule colors -->
+    <color name="tajweed_izhor">#FF4CAF50</color>
+    <color name="tajweed_idgom">#FF2196F3</color>
+    <color name="tajweed_ikhfo">#FFFF9800</color>
+    <color name="tajweed_iqlab">#FF9C27B0</color>
+    <color name="tajweed_ghunna">#FFFF5722</color>
+    <color name="tajweed_qalqala">#FF795548</color>
+    <color name="tajweed_madd">#FF009688</color>
+
+    <!-- Feedback colors -->
+    <color name="score_excellent">#FF4CAF50</color>
+    <color name="score_good">#FFFFC107</color>
+    <color name="score_poor">#FFD32F2F</color>
+
+    <!-- Surface colors -->
+    <color name="surface">#FFFFFFFF</color>
+    <color name="surface_variant">#FFFFF8E1</color>
+    <color name="background">#FFFFFBFE</color>
+
+    <!-- On colors -->
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="on_secondary">#FF000000</color>
+    <color name="on_surface">#FF1C1B1F</color>
+
+    <!-- Error -->
+    <color name="error">#FFD32F2F</color>
+
+    <!-- Launcher -->
+    <color name="ic_launcher_background">#FF1B5E20</color>
+</resources>
