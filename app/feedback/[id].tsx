@@ -1,20 +1,64 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { Colors } from '../../src/constants/colors';
 import { ScoreCircle } from '../../src/components/ScoreCircle';
 import { ArabicText } from '../../src/components/ArabicText';
+import { RecordingResult } from '../../src/data/models';
+import { getRecordingResults } from '../../src/services/storage';
 
 export default function FeedbackScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { theme } = useTheme();
 
-  const mockScore = 78;
-  const originalText = '\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u0651\u064E\u0647\u0650 \u0627\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0646\u0650 \u0627\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650';
-  const transcribedText = '\u0628\u0633\u0645 \u0627\u0644\u0644\u0647 \u0627\u0644\u0631\u062D\u0645\u0646 \u0627\u0644\u0631\u062D\u064A\u0645';
+  const [result, setResult] = useState<RecordingResult | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadResult();
+  }, [id]);
+
+  async function loadResult() {
+    try {
+      const results = await getRecordingResults();
+      const found = results.find((r) => r.id === parseInt(id || '0', 10));
+      setResult(found || null);
+    } catch {
+      // Keep empty
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={Colors.primary.main} />
+      </View>
+    );
+  }
+
+  if (!result) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <Ionicons name="alert-circle-outline" size={48} color={theme.colors.onSurfaceVariant} />
+        <Text style={[styles.noResultText, { color: theme.colors.onSurfaceVariant }]}>
+          Natija topilmadi
+        </Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.push('/(tabs)/practice')}
+        >
+          <Text style={styles.backButtonText}>Mashqqa qaytish</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const errors = result.errors ? JSON.parse(result.errors) : [];
 
   return (
     <ScrollView
@@ -22,34 +66,58 @@ export default function FeedbackScreen() {
       contentContainerStyle={styles.content}
     >
       <View style={styles.scoreSection}>
-        <ScoreCircle score={mockScore} size={140} />
+        <ScoreCircle score={result.score} size={140} />
         <Text style={[styles.scoreLabel, { color: theme.colors.onSurfaceVariant }]}>
           Sizning balingiz
         </Text>
       </View>
 
-      <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.onSurface }]}>
-          Asl matn
-        </Text>
-        <ArabicText text={originalText} size={24} style={{ color: theme.colors.onSurface, textAlign: 'center' }} />
-      </View>
+      {result.transcription ? (
+        <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+          <Text style={[styles.cardTitle, { color: theme.colors.onSurface }]}>
+            Aniqlangan matn
+          </Text>
+          <ArabicText text={result.transcription} size={24} style={{ color: Colors.tertiary.main, textAlign: 'center' }} />
+        </View>
+      ) : null}
 
-      <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-        <Text style={[styles.cardTitle, { color: theme.colors.onSurface }]}>
-          Aniqlangan matn
-        </Text>
-        <ArabicText text={transcribedText} size={24} style={{ color: Colors.tertiary.main, textAlign: 'center' }} />
-      </View>
+      {errors.length > 0 && (
+        <View style={[styles.card, { backgroundColor: Colors.error.container }]}>
+          <Text style={[styles.cardTitle, { color: Colors.error.onContainer }]}>
+            Xatolar ({errors.length})
+          </Text>
+          {errors.slice(0, 5).map((error: { expected: string; got: string }, index: number) => (
+            <View key={index} style={styles.errorRow}>
+              <Text style={[styles.errorExpected, { color: Colors.primary.main }]}>
+                {error.expected || '(tushirilgan)'}
+              </Text>
+              <Text style={[styles.errorArrow, { color: Colors.error.onContainer }]}>{' \u2192 '}</Text>
+              <Text style={[styles.errorGot, { color: Colors.error.main }]}>
+                {error.got || "(yo'q)"}
+              </Text>
+            </View>
+          ))}
+          {errors.length > 5 && (
+            <Text style={[styles.moreErrors, { color: Colors.error.onContainer }]}>
+              +{errors.length - 5} ta boshqa xato
+            </Text>
+          )}
+        </View>
+      )}
 
-      <View style={[styles.card, { backgroundColor: Colors.error.container }]}>
-        <Text style={[styles.cardTitle, { color: Colors.error.onContainer }]}>
-          Xatolar
-        </Text>
-        <Text style={[styles.errorText, { color: Colors.error.onContainer }]}>
-          Tajvid qoidalarini yaxshiroq rioya qiling. Harflarni aniq talaffuz qiling.
-        </Text>
-      </View>
+      {result.score >= 70 ? (
+        <View style={[styles.card, { backgroundColor: Colors.primary.container }]}>
+          <Text style={[styles.feedbackPositive, { color: Colors.primary.dark }]}>
+            Yaxshi natija! Mashq qilishda davom eting.
+          </Text>
+        </View>
+      ) : (
+        <View style={[styles.card, { backgroundColor: Colors.error.container }]}>
+          <Text style={[styles.errorText, { color: Colors.error.onContainer }]}>
+            Tajvid qoidalarini yaxshiroq rioya qiling. Harflarni aniq talaffuz qiling.
+          </Text>
+        </View>
+      )}
 
       <View style={styles.buttonRow}>
         <TouchableOpacity
@@ -88,6 +156,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 8,
   },
+  noResultText: {
+    fontSize: 16,
+    marginTop: 12,
+    marginBottom: 20,
+  },
   card: {
     borderRadius: 12,
     padding: 16,
@@ -105,9 +178,36 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: 'flex-start',
   },
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    alignSelf: 'flex-start',
+  },
+  errorExpected: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  errorArrow: {
+    fontSize: 14,
+  },
+  errorGot: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  moreErrors: {
+    fontSize: 12,
+    marginTop: 4,
+    alignSelf: 'flex-start',
+  },
   errorText: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  feedbackPositive: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
   },
   buttonRow: {
     flexDirection: 'row',

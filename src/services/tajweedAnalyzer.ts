@@ -57,6 +57,12 @@ function getFeedback(score: number): string {
   return "Ko'proq mashq kerak. Qaytadan urinib ko'ring.";
 }
 
+// NOTE: This is a pronunciation accuracy checker, not a full tajweed rule compliance analyzer.
+// It compares the consonant skeleton of the recitation against the expected text using
+// Levenshtein distance after stripping diacritical marks. A true tajweed analyzer would
+// require a custom ML model that evaluates ghunna, madd, ikhfa, and other rule-specific
+// application from the audio signal directly.
+
 export function analyzeRecitation(
   expectedText: string,
   transcribedText: string

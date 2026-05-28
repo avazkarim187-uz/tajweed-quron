@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/contexts/ThemeContext';
+import { useProgress } from '../../src/contexts/ProgressContext';
 import { tajweedRules } from '../../src/data/tajweedRules';
 import { Colors } from '../../src/constants/colors';
 import { TajweedRule } from '../../src/data/models';
@@ -18,11 +19,13 @@ const categoryColors: Record<string, string> = {
 export default function PracticeListScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { getProgressForRule } = useProgress();
 
   function renderItem({ item }: { item: TajweedRule }) {
     const categoryColor = categoryColors[item.category] || Colors.primary.main;
-    const score = 0;
-    const attempts = 0;
+    const ruleProgress = getProgressForRule(item.id);
+    const score = ruleProgress?.practiceScore ?? 0;
+    const attempts = ruleProgress?.totalAttempts ?? 0;
 
     return (
       <TouchableOpacity

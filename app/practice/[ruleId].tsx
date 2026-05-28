@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useProgress } from '../../src/contexts/ProgressContext';
 import { tajweedRules } from '../../src/data/tajweedRules';
@@ -13,12 +13,13 @@ import { QuranAyah } from '../../src/data/models';
 import * as audioRecorder from '../../src/services/audioRecorder';
 import { transcribeAudio } from '../../src/services/whisperApi';
 import { analyzeRecitation, TajweedAnalysisResult } from '../../src/services/tajweedAnalyzer';
-import { getApiKey } from '../../src/services/storage';
+import { getApiKey, saveRecordingResult } from '../../src/services/storage';
 
 export default function PracticeSessionScreen() {
   const { ruleId } = useLocalSearchParams<{ ruleId: string }>();
   const { theme } = useTheme();
   const { updateProgress } = useProgress();
+  const router = useRouter();
 
   const ruleIdNum = parseInt(ruleId || '0', 10);
   const rule = tajweedRules.find((r) => r.id === ruleIdNum);
@@ -130,7 +131,21 @@ export default function PracticeSessionScreen() {
       const result = analyzeRecitation(currentAyah.arabicText, transcription.text || '');
       setAnalysisResult(result);
       updateProgress(ruleIdNum, result.score);
+
+      const recordingResult = {
+        id: Date.now(),
+        ruleId: ruleIdNum,
+        ayahId: currentAyah.id,
+        audioPath: uri,
+        transcription: transcription.text || '',
+        score: result.score,
+        errors: JSON.stringify(result.errors),
+        timestamp: Date.now(),
+      };
+      await saveRecordingResult(recordingResult);
+
       setIsAnalyzing(false);
+      router.push(`/feedback/${recordingResult.id}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Tahlil qilishda xatolik yuz berdi";
       setErrorMessage(msg);

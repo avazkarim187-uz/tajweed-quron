@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { UserProgress, RecordingResult, AppSettings } from '../data/models';
 
 export enum StorageKeys {
@@ -27,11 +28,15 @@ export async function getProgress(): Promise<UserProgress[]> {
 }
 
 export async function saveApiKey(key: string): Promise<void> {
-  await AsyncStorage.setItem(StorageKeys.API_KEY, key);
+  await SecureStore.setItemAsync('tajweed_api_key', key);
 }
 
 export async function getApiKey(): Promise<string | null> {
-  return AsyncStorage.getItem(StorageKeys.API_KEY);
+  return SecureStore.getItemAsync('tajweed_api_key');
+}
+
+export async function deleteApiKey(): Promise<void> {
+  await SecureStore.deleteItemAsync('tajweed_api_key');
 }
 
 export async function saveRecordingResult(result: RecordingResult): Promise<void> {
@@ -59,4 +64,5 @@ export async function getSettings(): Promise<AppSettings> {
 export async function clearAll(): Promise<void> {
   const keys = Object.values(StorageKeys);
   await AsyncStorage.multiRemove(keys);
+  await SecureStore.deleteItemAsync('tajweed_api_key');
 }

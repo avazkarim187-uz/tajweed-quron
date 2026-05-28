@@ -1,17 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/contexts/ThemeContext';
+import { useProgress } from '../../src/contexts/ProgressContext';
 import { Colors } from '../../src/constants/colors';
+import { RecordingResult } from '../../src/data/models';
+import { getRecordingResults } from '../../src/services/storage';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { getMasteredRulesCount, getOverallScore, getStreak } = useProgress();
+  const [recentResults, setRecentResults] = useState<RecordingResult[]>([]);
 
-  const completedRules = 3;
-  const overallScore = 72;
-  const streakDays = 5;
+  const completedRules = getMasteredRulesCount();
+  const overallScore = getOverallScore();
+  const streakDays = getStreak();
+
+  useEffect(() => {
+    loadRecentResults();
+  }, []);
+
+  async function loadRecentResults() {
+    try {
+      const results = await getRecordingResults();
+      setRecentResults(results.slice(-3).reverse());
+    } catch {
+      // Keep empty
+    }
+  }
 
   return (
     <ScrollView
@@ -94,12 +112,27 @@ export default function HomeScreen() {
       <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
         So'nggi natijalar
       </Text>
-      <View style={[styles.recentCard, { backgroundColor: theme.colors.surface }]}>
-        <Ionicons name="time-outline" size={20} color={theme.colors.onSurfaceVariant} />
-        <Text style={[styles.recentText, { color: theme.colors.onSurfaceVariant }]}>
-          Hozircha natijalar yo'q. Mashq qilishni boshlang!
-        </Text>
-      </View>
+      {recentResults.length > 0 ? (
+        recentResults.map((result) => (
+          <TouchableOpacity
+            key={result.id}
+            style={[styles.recentCard, { backgroundColor: theme.colors.surface, marginBottom: 8 }]}
+            onPress={() => router.push(`/feedback/${result.id}`)}
+          >
+            <Ionicons name="checkmark-circle" size={20} color={Colors.primary.main} />
+            <Text style={[styles.recentText, { color: theme.colors.onSurface }]}>
+              Ball: {result.score}%
+            </Text>
+          </TouchableOpacity>
+        ))
+      ) : (
+        <View style={[styles.recentCard, { backgroundColor: theme.colors.surface }]}>
+          <Ionicons name="time-outline" size={20} color={theme.colors.onSurfaceVariant} />
+          <Text style={[styles.recentText, { color: theme.colors.onSurfaceVariant }]}>
+            Hozircha natijalar yo'q. Mashq qilishni boshlang!
+          </Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
