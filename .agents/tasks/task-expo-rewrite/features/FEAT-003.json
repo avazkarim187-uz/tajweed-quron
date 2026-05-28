@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Implement all screens with complete UI: Home (welcome, stats, quick actions), Lessons list and detail, Quran surah list and reader, Practice list and session with recording, Progress tracking with weekly activity, Settings with API key and theme configuration",
-  "status": "pending",
+  "status": "in_progress",
   "steps": [
     "Create src/components/ArabicText.tsx - styled component for RTL Arabic text with proper font size and alignment",
     "Create src/components/TajweedColorText.tsx - component that color-codes Arabic text based on tajweed rules (using rule colors from constants)",
