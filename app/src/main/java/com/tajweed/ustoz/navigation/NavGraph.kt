@@ -14,8 +14,12 @@ import androidx.navigation.navArgument
 import com.tajweed.ustoz.ui.screens.home.HomeScreen
 import com.tajweed.ustoz.ui.screens.lessons.LessonDetailScreen
 import com.tajweed.ustoz.ui.screens.lessons.LessonsListScreen
+import com.tajweed.ustoz.ui.screens.practice.PracticeListScreen
+import com.tajweed.ustoz.ui.screens.practice.PracticeScreen
 import com.tajweed.ustoz.ui.screens.quran.QuranReaderScreen
 import com.tajweed.ustoz.ui.screens.quran.QuranScreen
+import com.tajweed.ustoz.ui.screens.recording.FeedbackScreen
+import com.tajweed.ustoz.ui.screens.recording.RecordingScreen
 
 @Composable
 fun NavGraph(
@@ -89,7 +93,7 @@ fun NavGraph(
         }
 
         composable(Screen.Practice.route) {
-            PlaceholderScreen("Mashq")
+            PracticeListScreen(navController = navController)
         }
 
         composable(
@@ -97,7 +101,10 @@ fun NavGraph(
             arguments = listOf(navArgument("ruleId") { type = NavType.IntType })
         ) { backStackEntry ->
             val ruleId = backStackEntry.arguments?.getInt("ruleId") ?: 0
-            PlaceholderScreen("Mashq sessiyasi: $ruleId")
+            PracticeScreen(
+                ruleId = ruleId,
+                navController = navController
+            )
         }
 
         composable(
@@ -111,7 +118,10 @@ fun NavGraph(
         ) { backStackEntry ->
             val ayahId = backStackEntry.arguments?.getInt("ayahId") ?: -1
             val displayAyahId = if (ayahId == -1) null else ayahId
-            PlaceholderScreen("Yozib olish: ${displayAyahId ?: "umumiy"}")
+            RecordingScreen(
+                ayahId = displayAyahId,
+                navController = navController
+            )
         }
 
         composable(
@@ -119,7 +129,10 @@ fun NavGraph(
             arguments = listOf(navArgument("resultId") { type = NavType.IntType })
         ) { backStackEntry ->
             val resultId = backStackEntry.arguments?.getInt("resultId") ?: 0
-            PlaceholderScreen("Natija: $resultId")
+            FeedbackScreen(
+                resultId = resultId,
+                navController = navController
+            )
         }
 
         composable(Screen.Progress.route) {

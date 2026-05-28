@@ -1,6 +1,10 @@
 package com.tajweed.ustoz.util
 
-class TajweedAnalyzer {
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class TajweedAnalyzer @Inject constructor() {
 
     fun analyzeTranscription(
         expected: String,
