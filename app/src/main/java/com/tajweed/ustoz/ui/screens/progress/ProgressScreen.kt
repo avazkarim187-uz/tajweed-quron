@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tajweed.ustoz.data.model.RecordingResult
-import com.tajweed.ustoz.ui.theme.TajweedIzhor
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

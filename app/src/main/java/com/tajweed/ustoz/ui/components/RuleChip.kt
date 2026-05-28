@@ -1,5 +1,6 @@
 package com.tajweed.ustoz.ui.components
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
@@ -14,6 +15,7 @@ import com.tajweed.ustoz.ui.theme.TajweedIzhor
 import com.tajweed.ustoz.ui.theme.TajweedMadd
 import com.tajweed.ustoz.ui.theme.TajweedQalqala
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RuleChip(
     category: String,
